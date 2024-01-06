@@ -14,12 +14,16 @@ export class WatchController {
 
   @Get('/github')
   getGithubInfo(@Headers('host') host: string) {
-    return this.fileWatcherService.getGithubRoot().map((t) => {
+    const content = this.fileWatcherService.getGithubRoot().map((t) => {
       return {
         path: t.path,
         url: host + '/watch/github/' + t.url,
       };
     });
+
+    return {
+      tree: content,
+    };
   }
 
   @Get('/github/:file(*)')
