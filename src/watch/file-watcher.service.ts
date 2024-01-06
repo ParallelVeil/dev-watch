@@ -68,7 +68,7 @@ export class FileWatcherService {
       const msg = pre[keys[i]];
       if (msg.file) {
         ret.push({
-          path: keys[i],
+          path: msg.path,
           url: msg.route,
         });
       } else {
