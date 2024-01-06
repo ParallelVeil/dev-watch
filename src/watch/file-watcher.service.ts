@@ -2,6 +2,8 @@ import * as chokidar from 'chokidar';
 import { FileStores } from './FileStores';
 import 'log-timestamp';
 import { Injectable } from '@nestjs/common';
+import * as process from 'process';
+import { Response } from 'express';
 
 @Injectable()
 export class FileWatcherService {
@@ -57,4 +59,33 @@ export class FileWatcherService {
   getStore() {
     return this.fileStores;
   }
+
+  getGithubRoot(root?: FileStores) {
+    const ret: GithubRoot[] = [];
+    const pre = root || this.fileStores.tree;
+    const keys = Object.keys(pre);
+    for (let i = 0; i < keys.length; i++) {
+      const msg = pre[keys[i]];
+      if (msg.file) {
+        ret.push({
+          path: keys[i],
+          url: msg.route,
+        });
+      } else {
+        if (Object.keys(msg).length > 0) {
+          ret.push(...this.getGithubRoot(msg));
+        }
+      }
+    }
+    return ret;
+  }
+
+  readFile(file: string, response: Response) {
+    return response.sendFile(process.env.WATCH + '/' + file);
+  }
 }
+
+type GithubRoot = {
+  path: string;
+  url: string;
+};

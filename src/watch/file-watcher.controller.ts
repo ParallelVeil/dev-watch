@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Headers, Param, Res } from '@nestjs/common';
 import { FileWatcherService } from './file-watcher.service';
+import { Response } from 'express';
 
 @Controller('watch')
 export class WatchController {
@@ -9,5 +10,21 @@ export class WatchController {
   getDirectoryInfo() {
     const directoryInfo = this.fileWatcherService.getStore();
     return directoryInfo.tree;
+  }
+
+  @Get('/github')
+  getGithubInfo(@Headers('host') host: string) {
+    return this.fileWatcherService.getGithubRoot().map((t) => {
+      return {
+        path: t.path,
+        url: host + '/watch/github/' + t.url,
+      };
+    });
+  }
+
+  @Get('/github/:file(*)')
+  getGithubFile(@Param('file') file: string, @Res() response: Response) {
+    response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    return this.fileWatcherService.readFile(file, response);
   }
 }
